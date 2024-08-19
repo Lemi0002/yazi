@@ -1,13 +1,7 @@
-use ratatui::{buffer::Buffer, layout::{Margin, Rect}, text::Line, widgets::{Block, BorderType, Widget}};
+use ratatui::{buffer::Buffer, layout::{Margin, Rect}, text::Line, widgets::{Paragraph, Widget}};
 use yazi_config::THEME;
 
-use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::{Paragraph, Widget}};
-use yazi_config::THEME;
-use anyhow::{Result, bail};
-use syntect::easy::HighlightLines;
-use yazi_core::input::InputMode;
-
-use crate::{Ctx, Term};
+use crate::Ctx;
 
 pub(crate) struct Input<'a> {
 	cx: &'a Ctx,
@@ -18,7 +12,7 @@ impl<'a> Input<'a> {
 }
 
 impl Widget for Input<'_> {
-	fn render(self, _: Rect, buf: &mut Buffer) {
+	fn render(self, win: Rect, buf: &mut Buffer) {
 		let input = &self.cx.input;
 		let mut area = self.cx.mgr.area(input.position);
 		area.x = 0;

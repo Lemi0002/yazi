@@ -19,13 +19,13 @@ impl App {
 		let frame = term
 			.draw(|f| {
 				_ = Lives::scope(&self.cx, || Ok(f.render_widget(Root::new(&self.cx), f.area())));
-				if let Some((x, y)) = self.cx.cursor() {
+				if let Some((position, _)) = self.cx.cursor() {
 					let input = &self.cx.input;
-					let area = self.cx.manager.area(input.position);
+					let area = self.cx.mgr.area(input.position);
 					if let Ok(input_title_width) = u16::try_from(input.title.len() + 1) {
-						f.set_cursor_position((x - area.x - 1 + input_title_width, y + f.area().height - 2));
+						f.set_cursor_position(Position{x: position.x - area.x - 1 + input_title_width, y: position.y + f.area().height - 2});
 					} else {
-						f.set_cursor_position((x - area.x - 1, y + f.area().height - 2));
+						f.set_cursor_position(Position{x: position.x - area.x - 1, y: position.y + f.area().height - 2});
 					}
 				}
 			})
