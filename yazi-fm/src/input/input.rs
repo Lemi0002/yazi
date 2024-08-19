@@ -1,11 +1,8 @@
 use std::ops::Range;
 
-use anyhow::{bail, Result};
-use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::{Block, BorderType, Paragraph, Widget}};
-use syntect::easy::HighlightLines;
-use yazi_config::{PREVIEW, THEME};
+use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::{Paragraph, Widget}};
+use yazi_config::THEME;
 use yazi_core::input::InputMode;
-use yazi_plugin::external::Highlighter;
 
 use crate::{Ctx, Term};
 
@@ -15,35 +12,20 @@ pub(crate) struct Input<'a> {
 
 impl<'a> Input<'a> {
 	pub(crate) fn new(cx: &'a Ctx) -> Self { Self { cx } }
-
-	fn highlighted_value(&self) -> Result<Line<'static>> {
-		if !self.cx.input.highlight {
-			bail!("Highlighting is disabled");
-		}
-
-		let (theme, syntaxes) = futures::executor::block_on(Highlighter::init());
-		if let Some(syntax) = syntaxes.find_syntax_by_name("Bourne Again Shell (bash)") {
-			let mut h = HighlightLines::new(syntax, theme);
-			let regions = h.highlight_line(self.cx.input.value(), syntaxes)?;
-			return Ok(Highlighter::to_line_widget(regions, &PREVIEW.indent()));
-		}
-		bail!("Failed to find syntax")
-	}
 }
 
 impl<'a> Widget for Input<'a> {
 	fn render(self, win: Rect, buf: &mut Buffer) {
 		let input = &self.cx.input;
-		let area = self.cx.area(&input.position);
+		let mut area = self.cx.area(&input.position);
+		area.x = 0;
+		area.y = win.height - 1;
+		area.height = 1;
 
 		yazi_plugin::elements::Clear::default().render(area, buf);
-		Paragraph::new(self.highlighted_value().unwrap_or_else(|_| Line::from(input.value())))
-			.block(
-				Block::bordered()
-					.border_type(BorderType::Rounded)
-					.border_style(THEME.input.border)
-					.title(Line::styled(&input.title, THEME.input.title)),
-			)
+		let input_value = input.value();
+		let input_title = &input.title;
+		Paragraph::new(Line::from(format!("{input_title} {input_value}")))
 			.style(THEME.input.value)
 			.render(area, buf);
 

@@ -22,7 +22,13 @@ impl App {
 				_ = Lives::scope(&self.cx, |_| Ok(f.render_widget(Root::new(&self.cx), f.size())));
 
 				if let Some((x, y)) = self.cx.cursor() {
-					f.set_cursor(x, y);
+					let input = &self.cx.input;
+					let area = self.cx.area(&input.position);
+					if let Ok(input_title_width) = u16::try_from(input.title.len() + 1) {
+						f.set_cursor(x - area.x - 1 + input_title_width, y + f.size().height - 2);
+					} else {
+						f.set_cursor(x - area.x - 1, y + f.size().height - 2);
+					}
 				}
 			})
 			.unwrap();
