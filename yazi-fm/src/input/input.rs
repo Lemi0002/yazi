@@ -17,7 +17,7 @@ impl<'a> Input<'a> {
 impl<'a> Widget for Input<'a> {
 	fn render(self, win: Rect, buf: &mut Buffer) {
 		let input = &self.cx.input;
-		let mut area = self.cx.area(&input.position);
+		let mut area = self.cx.manager.area(input.position);
 		area.x = 0;
 		area.y = win.height - 1;
 		area.height = 1;
