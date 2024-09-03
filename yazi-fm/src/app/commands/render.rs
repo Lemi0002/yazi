@@ -19,15 +19,15 @@ impl App {
 		let collision = COLLISION.swap(false, Ordering::Relaxed);
 		let frame = term
 			.draw(|f| {
-				_ = Lives::scope(&self.cx, |_| Ok(f.render_widget(Root::new(&self.cx), f.size())));
+				_ = Lives::scope(&self.cx, |_| Ok(f.render_widget(Root::new(&self.cx), f.area())));
 
 				if let Some((x, y)) = self.cx.cursor() {
 					let input = &self.cx.input;
-					let area = self.cx.area(&input.position);
+					let area = self.cx.manager.area(input.position);
 					if let Ok(input_title_width) = u16::try_from(input.title.len() + 1) {
-						f.set_cursor(x - area.x - 1 + input_title_width, y + f.size().height - 2);
+						f.set_cursor_position((x - area.x - 1 + input_title_width, y + f.area().height - 2));
 					} else {
-						f.set_cursor(x - area.x - 1, y + f.size().height - 2);
+						f.set_cursor_position((x - area.x - 1, y + f.area().height - 2));
 					}
 				}
 			})
@@ -57,10 +57,10 @@ impl App {
 
 		let frame = term
 			.draw_partial(|f| {
-				f.render_widget(crate::notify::Layout::new(&self.cx), f.size());
+				f.render_widget(crate::notify::Layout::new(&self.cx), f.area());
 
-				if let Some((x, y)) = self.cx.cursor() {
-					f.set_cursor(x, y);
+				if let Some(pos) = self.cx.cursor() {
+					f.set_cursor_position(pos);
 				}
 			})
 			.unwrap();
@@ -75,20 +75,20 @@ impl App {
 		let mut new = Buffer::empty(frame.area);
 		for y in new.area.top()..new.area.bottom() {
 			for x in new.area.left()..new.area.right() {
-				let cell = frame.buffer.get(x, y);
+				let cell = &frame.buffer[(x, y)];
 				if cell.skip {
-					*new.get_mut(x, y) = cell.clone();
+					new[(x, y)] = cell.clone();
 				}
-				new.get_mut(x, y).set_skip(!cell.skip);
+				new[(x, y)].set_skip(!cell.skip);
 			}
 		}
 
 		let patches = frame.buffer.diff(&new);
 		let mut backend = CrosstermBackend::new(BufWriter::new(stderr().lock()));
 		backend.draw(patches.into_iter()).ok();
-		if let Some((x, y)) = cursor {
+		if let Some(pos) = cursor {
 			backend.show_cursor().ok();
-			backend.set_cursor(x, y).ok();
+			backend.set_cursor_position(pos).ok();
 		}
 		backend.flush().ok();
 	}
