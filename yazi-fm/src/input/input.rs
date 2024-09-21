@@ -2,6 +2,8 @@ use std::ops::Range;
 
 use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::{Paragraph, Widget}};
 use yazi_config::THEME;
+use anyhow::{Result, bail};
+use syntect::easy::HighlightLines;
 use yazi_core::input::InputMode;
 
 use crate::{Ctx, Term};
