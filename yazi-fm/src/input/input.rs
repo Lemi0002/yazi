@@ -16,7 +16,7 @@ impl<'a> Input<'a> {
 	pub(crate) fn new(cx: &'a Ctx) -> Self { Self { cx } }
 }
 
-impl<'a> Widget for Input<'a> {
+impl Widget for Input<'_> {
 	fn render(self, win: Rect, buf: &mut Buffer) {
 		let input = &self.cx.input;
 		let mut area = self.cx.manager.area(input.position);
