@@ -55,7 +55,7 @@ impl App {
 		let frame = term
 			.draw_partial(|f| {
 				_ = Lives::scope(&self.cx, || {
-					f.render_widget(crate::tasks::Progress, f.area());
+					f.render_widget(crate::tasks::Progress::new(&self.cx), f.area());
 					f.render_widget(crate::notify::Notify::new(&self.cx), f.area());
 					Ok(())
 				});
