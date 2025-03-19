@@ -1,4 +1,5 @@
-use std::ops::Range;
+use ratatui::{buffer::Buffer, layout::{Margin, Rect}, text::Line, widgets::{Block, BorderType, Widget}};
+use yazi_config::THEME;
 
 use ratatui::{buffer::Buffer, layout::Rect, text::Line, widgets::{Paragraph, Widget}};
 use yazi_config::THEME;
@@ -17,7 +18,7 @@ impl<'a> Input<'a> {
 }
 
 impl Widget for Input<'_> {
-	fn render(self, win: Rect, buf: &mut Buffer) {
+	fn render(self, _: Rect, buf: &mut Buffer) {
 		let input = &self.cx.input;
 		let mut area = self.cx.mgr.area(input.position);
 		area.x = 0;
@@ -31,20 +32,6 @@ impl Widget for Input<'_> {
 			.style(THEME.input.value)
 			.render(area, buf);
 
-		if let Some(Range { start, end }) = input.selected() {
-			let x = win.width.min(area.x + 1 + start);
-			let y = win.height.min(area.y + 1);
-
-			buf.set_style(
-				Rect { x, y, width: (end - start).min(win.width - x), height: 1.min(win.height - y) },
-				THEME.input.selected,
-			)
-		}
-
-		_ = match input.mode() {
-			InputMode::Insert => Term::set_cursor_bar(),
-			InputMode::Replace => Term::set_cursor_underscore(),
-			_ => Term::set_cursor_block(),
-		};
+		input.render(area.inner(Margin::new(1, 1)), buf);
 	}
 }
